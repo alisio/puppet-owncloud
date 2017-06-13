@@ -1,0 +1,14 @@
+{
+  "name": "owncloud",
+  "version": "0.1.0",
+  "author": "Antonio Alisio de Meneses Cordeiro",
+  "summary": "This is a manifest for building Owncloud development VM environments in CentOS 7",
+  "license": "GPL v3",
+  "source": "https://github.com/alisio/puppet-owncloud",
+  "project_page": "https://github.com/alisio/puppet-owncloud",
+  "issues_url": null,
+  "dependencies": [
+    {"name":"puppetlabs-stdlib","version_requirement":">= 1.0.0"}
+  ],
+  "data_provider": null
+}

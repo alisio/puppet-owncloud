@@ -1,0 +1,4 @@
+CREATE DATABASE owncloud;
+GRANT ALL ON owncloud.* to 'owncloud'@'localhost' IDENTIFIED BY '<%= @senhaOwncloudDb %>';
+FLUSH PRIVILEGES;
+exit
