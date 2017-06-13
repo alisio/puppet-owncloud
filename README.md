@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # alisiovps
 
 #### Table of Contents
@@ -81,3 +82,7 @@ know what the ground rules for contributing are.
 If you aren't using changelog, put your release notes here (though you should
 consider using changelog). You can also add any additional sections you feel
 are necessary or important to include here. Please use the `## ` header.
+=======
+# puppet-owncloud
+Puppet manifest for building Owncloud development VM environments
+>>>>>>> c85f725d05e2e502935af40269e3b3504b675e6e
