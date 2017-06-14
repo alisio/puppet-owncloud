@@ -1,5 +1,5 @@
 <<<<<<< HEAD
-# alisiovps
+# puppet-owncloud
 
 #### Table of Contents
 
