@@ -167,9 +167,21 @@ class certificadoSSL {
     # pattern => 'httpd',
   }
 }
+# == Class: owncloudManutencao
+#
+class owncloudManutencao {
+  cron { 'lixoApagar':
+    command => 'sudo -u apache /var/www/html/owncloud/occ trashbin:cleanup',
+    user => 'root',
+    hour => 0,
+    minute  => 0,
+    monthday => 1,
+  }
+}
 
 include owncloud
 include configuraServicos
 include seguranca
 include certificadoSSL
-Class['owncloud'] -> Class['certificadoSSL'] -> Class['configuraServicos'] -> Class['seguranca']
+include owncloudManutencao
+Class['owncloud'] -> Class['certificadoSSL'] -> Class['configuraServicos'] -> Class['seguranca'] -> Class['owncloudManutencao']
