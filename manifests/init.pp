@@ -45,7 +45,7 @@ $fullyq           = $fqdn
 $pacotes          = ['certbot-apache','httpd','git','mariadb-server','mariadb',
                      'mlocate','mod_ssl','ngrep','owncloud-files',
                      'php56','php56-php','php56-php-gd','php56-php-mbstring',
-                     'php56-php-mysqlnd','vim-enhanced','wget']
+                     'php56-php-mysqlnd','php56-php-pecl-apcu','vim-enhanced','wget']
 $servicos         = ['httpd','mariadb']
 $senhaRootDb      = 'senhaDeRootdoBancoDeDados'
 $senhaOwncloudDb  = 'senhadoUsuarioOwncloudnoBancoDeDados'
