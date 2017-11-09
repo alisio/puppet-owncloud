@@ -186,7 +186,7 @@ class owncloudManutencao {
     user => 'root',
     hour => 0,
     minute  => 0,
-    monthday => 1,
+    weekday => 0,
   }
 }
 
