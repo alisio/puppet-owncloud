@@ -38,14 +38,21 @@
 # ----------
 $certdir          = '/etc/ssl/certs'
 $keydir           = '/etc/ssl/private'
+# Para instalar certificado auto assinado, definir certTipo como autoAss
+$certTipo         = 'letsencrypt'
 $wwwroot          = '/var/www/html/owncloud'
 $fullyq           = $fqdn
-$pacotes          = ['git','mariadb-server-5.5.52-1.el7','mariadb-5.5.52-1.el7','mlocate','mod_ssl','ngrep','owncloud-9.1.6-1.1','php-5.4.16-42.el7','php-mysql','php-pecl-apcu','vim-enhanced','wget']
+$pacotes          = ['certbot-apache','httpd','git','mariadb-server','mariadb',
+                     'mlocate','mod_ssl','ngrep','owncloud-files',
+                     'php56','php56-php','php56-php-gd','php56-php-mbstring',
+                     'php56-php-mysqlnd','vim-enhanced','wget']
 $servicos         = ['httpd','mariadb']
 $senhaRootDb      = 'senhaDeRootdoBancoDeDados'
 $senhaOwncloudDb  = 'senhadoUsuarioOwncloudnoBancoDeDados'
-$nomeModulo       = 'owncloud'
+$nomeModulo       = 'puppet-owncloud'
 $versaoCentos     = $operatingsystemmajrelease
+
+
 
 # TODO: set firewall
 # TODO: set memcached
@@ -53,17 +60,24 @@ $versaoCentos     = $operatingsystemmajrelease
 class owncloud {
   exec { 'repositorio-owncloud':
     command => "rpm --import https://download.owncloud.org/download/repositories/stable/CentOS_${versaoCentos}/repodata/repomd.xml.key; curl -L https://download.owncloud.org/download/repositories/stable/CentOS_${versaoCentos}/ce:stable.repo -o /etc/yum.repos.d/ownCloud.repo",
+    unless => 'rpm -qa | egrep "^owncloud"',
+    path => '/usr/bin:/usr/sbin:/bin:/usr/local/bin',
+  }
+  exec { 'repositorio-remi':
+    command => "cd /tmp/; wget https://rpms.remirepo.net/enterprise/remi-release-${versaoCentos}.rpm;rpm -ivh remi-release-${versaoCentos}.rpm",
+    unless => 'rpm -qa | egrep "^remi-release"',
     path => '/usr/bin:/usr/sbin:/bin:/usr/local/bin',
   }
   package { $pacotes :
     ensure => installed,
     require   => Exec['repositorio-owncloud'],
+    notify => Exec['updatedb'],
     allow_virtual => true,
   }
   exec { 'updatedb':
     command => 'updatedb',
     path => '/usr/bin:/usr/sbin:/bin:/usr/local/bin',
-    require   => Package[$pacotes],
+    refreshonly => true,
   }
   file { '/etc/timezone':
     ensure => link,
@@ -90,7 +104,7 @@ class owncloud {
 # == Class: configuraServicos
 #
 class configuraServicos {
-  service { 'mariadb':
+  service { $servicos:
     ensure => running,
     enable => true,
     hasrestart => true,
@@ -101,6 +115,7 @@ class configuraServicos {
     command => 'chown apache: /var/www/html/* -R',
     path => '/usr/bin:/usr/sbin:/bin:/usr/local/bin',
     # refreshonly => true,
+    logoutput => false,
   }
   exec { 'owncloud-db-config':
     command   => "/usr/bin/mysql -uroot < /var/tmp/config-mariadb-owncloud.conf;/bin/rm -f /var/tmp/config-mariadb-owncloud.conf ",
@@ -121,14 +136,15 @@ class configuraServicos {
 # == Class: seguranca
 #
 class seguranca {
-  # resources
-  exec { 'selinux-disable':
-    unless  =>  '/bin/egrep "^SELINUX *= *disabled$" /etc/selinux/config > /dev/null 2>&1',
-    command => '/bin/sed -i s/SELINUX=.*/SELINUX=disabled/g /etc/selinux/config',
-    notify  => Notify['reboot'],
-  }
-  notify { reboot:
-    message   => 'Necessario reiniciar servidor para aplicacao de configuracao SELINUX',
+  if "$selinux" == "true" {
+    exec { 'selinux-disable':
+      onlyif  =>  '/sbin/selinuxenabled',
+      command => '/bin/sed -i s/SELINUX=.*/SELINUX=disabled/g /etc/selinux/config;reboot',
+      notify  => Notify['reboot'],
+    }
+    notify { reboot:
+      message   => 'Necessario reiniciar servidor para aplicacao de configuracao SELINUX',
+    }
   }
 }
 # == Class: certificadoSSL
@@ -190,9 +206,38 @@ class owncloudManutencao {
   }
 }
 
-include owncloud
-include configuraServicos
-include seguranca
-include certificadoSSL
-include owncloudManutencao
-Class['owncloud'] -> Class['certificadoSSL'] -> Class['configuraServicos'] -> Class['seguranca'] -> Class['owncloudManutencao']
+# == Class: letsencrypt
+#
+class letsencrypt {
+  cron { 'renovarCertLetsEncrypt':
+    command => '/usr/bin/certbot renew',
+    user => 'root',
+    hour => 1,
+    minute  => 0,
+    weekday => 0,
+    monthday => 1
+  }
+}
+
+if "$certTipo" == "autoAss" {
+  include owncloud
+  include configuraServicos
+  include seguranca
+  include certificadoSSL
+  include owncloudManutencao
+  Class['owncloud'] -> Class['certificadoSSL'] -> Class['configuraServicos'] -> Class['seguranca'] -> Class['owncloudManutencao']
+} elsif "$certTipo" == "letsencrypt" {
+    include letsencrypt
+    include owncloud
+    include configuraServicos
+    include seguranca
+    include owncloudManutencao
+    Class['owncloud'] -> Class['letsencrypt'] -> Class['configuraServicos'] -> Class['seguranca'] -> Class['owncloudManutencao']
+} else {
+  # TODO:
+  include owncloud
+  include configuraServicos
+  include seguranca
+  include owncloudManutencao
+  Class['owncloud'] -> Class['configuraServicos'] -> Class['seguranca'] -> Class['owncloudManutencao']
+}

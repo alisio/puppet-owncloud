@@ -2,7 +2,7 @@
 # vi: set ft=ruby :
 
 $script = <<SCRIPT
-moduloNome=asteriskgenerico
+moduloNome="puppet-owncloud"
 versaoGuestadditions=5.1.18
 echo Provisionando VM
 if [ ! -f /etc/${moduloNome}-provisionado ]; then
@@ -10,9 +10,9 @@ if [ ! -f /etc/${moduloNome}-provisionado ]; then
   yum -y update
   yum groupinstall -y "development tools"
   yum install -y epel-release
-  yum install -y puppet wget vim
-  mv /etc/puppet/modules /etc/puppet/modules.old
-  ln -s /vagrant/modules /etc/puppet/modules
+  yum install -y puppet wget vim kernel-devel
+  # mv -f /etc/puppet/modules /etc/puppet/modules.old
+  ln -s /vagrant/ /etc/puppet/modules/$moduloNome
   echo "  cd /tmp/" >> /etc/rc.local
   echo "  /usr/bin/wget -q http://download.virtualbox.org/virtualbox/${versaoGuestadditions}/VBoxGuestAdditions_$versaoGuestadditions.iso" >> /etc/rc.local
   echo "  /bin/mount -t iso9660 -o loop /tmp/VBoxGuestAdditions_${versaoGuestadditions}.iso /mnt" >> /etc/rc.local
@@ -31,4 +31,6 @@ SCRIPT
 Vagrant.configure("2") do |config|
   config.vm.box = "centos/7"
   config.vm.provision "shell", inline: $script
+  config.vm.synced_folder ".", "/vagrant", type: "virtualbox"
+  config.vm.network "private_network", ip: "10.31.8.180"
 end
