@@ -214,8 +214,9 @@ class letsencrypt {
     user => 'root',
     hour => 1,
     minute  => 0,
-    weekday => 0,
-    monthday => 1
+    month => '*',
+    monthday => '*',
+    weekday => '*',
   }
 }
 
