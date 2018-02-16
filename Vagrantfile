@@ -3,7 +3,7 @@
 
 $script = <<SCRIPT
 moduloNome="puppet-owncloud"
-versaoGuestadditions=5.1.18
+versaoGuestadditions=5.2.4
 echo Provisionando VM
 if [ ! -f /etc/${moduloNome}-provisionado ]; then
   #rpm -ivh http://yum.puppetlabs.com/puppetlabs-release-el-7.noarch.rpm

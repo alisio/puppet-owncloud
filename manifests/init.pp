@@ -99,6 +99,11 @@ class owncloud {
     owner     => 'root',
     group     => 'root',
   }
+  exec { 'criar link simbolico para php':
+    command => 'ln -s /usr/bin/php56 /usr/bin/php',
+    onlyif  =>  'test -f /usr/bin/php56 && test ! -f /usr/bin/php',
+    path => '/usr/bin:/usr/sbin:/bin:/usr/local/bin',
+  }
 }
 
 # == Class: configuraServicos
@@ -203,6 +208,13 @@ class owncloudManutencao {
     hour => 0,
     minute  => 0,
     weekday => 0,
+  }
+  cron { 'background_jobs':
+    command => 'sudo -u apache php -f /var/www/html/owncloud/cron.php',
+    user => 'root',
+    hour => '*',
+    minute  => '*/15',
+    weekday => '*',
   }
 }
 

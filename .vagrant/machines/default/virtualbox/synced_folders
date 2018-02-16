@@ -1,1 +1,1 @@
-{"virtualbox":{"/vagrant":{"type":"virtualbox","guestpath":"/vagrant","hostpath":"/home/81817002368/dev/puppet-owncloud","disabled":false,"__vagrantfile":true}}}
+{"virtualbox":{"/vagrant":{"type":"virtualbox","guestpath":"/vagrant","hostpath":"/Users/alisio/dev/puppet-owncloud","disabled":false,"__vagrantfile":true}}}
